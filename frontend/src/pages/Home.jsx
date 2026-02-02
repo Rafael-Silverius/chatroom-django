@@ -1,8 +1,6 @@
-import { useState } from "react";
+import Layout from "../components/layout/Layout";
 
 function Home() {
-  const [rooms, setRooms] = useState([]);
-  const []
-  return <div>Home</div>;
+  return <Layout />;
 }
 export default Home;

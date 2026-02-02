@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ACCESS_TOKEN, apiUrl } from "./constants";
+import { ACCESS_TOKEN, apiUrl } from "../utils/constants";
 
 // Create Axios instance with baseURL from .env
 const api = axios.create({
@@ -17,8 +17,6 @@ api.interceptors.request.use(
         Authorization: `Bearer ${token}`,
       };
     }
-
-    console.log("Requesting:", config.baseURL + config.url); // DEBUG full URL
     return config;
   },
   (error) => Promise.reject(error)

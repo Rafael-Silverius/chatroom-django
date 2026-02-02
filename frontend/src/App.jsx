@@ -2,9 +2,9 @@ import React from "react";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import NotFound from "./pages/NotFound";
-import Home from "./pages/home";
+import Home from "./pages/Home";
 
-import ProtectedRoute from "./components/ProtectedRoutes";
+import ProtectedRoute from "./components/routes/ProtectedRoutes";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 function Logout() {
