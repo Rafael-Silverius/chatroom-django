@@ -13,7 +13,7 @@ class Room(models.Model):
 
 class Message (models.Model):
     content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True )
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages')
 

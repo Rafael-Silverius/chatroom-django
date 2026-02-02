@@ -5,6 +5,7 @@ from .serializers import UserSerializer,MessageSerializer,RoomSerializer
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 
 from .models import Message,Room
 
@@ -16,15 +17,25 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+#Get Current User
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "id": request.user.id,
+            "username": request.user.username,
+        })
+
 
 #Room Creation
 class RoomListCreate(generics.ListCreateAPIView):
     serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated]
 
-    #Display all rooms
+    #Display my registered rooms
     def get_queryset(self):
-       return Room.objects.all()
+       return Room.objects.filter(members=self.request.user)
     
     #Create a new room with the auth-user as the owner
     def perform_create(self,serializer):
@@ -33,6 +44,18 @@ class RoomListCreate(generics.ListCreateAPIView):
        #make the user which creates the room also an admin and member
        room.members.add(self.request.user)
        room.admins.add(self.request.user)
+
+#Discoverable Rooms
+class DiscoverRoomsView(generics.ListAPIView):
+    serializer_class = RoomSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Room.objects.exclude(members=self.request.user)
+
+
+
+
 
 #Join Room
 class JoinRoomView(APIView):
@@ -59,7 +82,7 @@ class LeaveRoomView(APIView):
 
 
 
-#Message Creation
+#Create New Messages
 class MessageListCreate(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
@@ -76,27 +99,33 @@ class MessageListCreate(generics.ListCreateAPIView):
         room = get_object_or_404(Room, id=room_id)
 
         if self.request.user not in room.members.all():
-            raise PermissionError("You must be a member of this room to send messages")
+            raise PermissionDenied("You must be a member of this room to send messages")
 
         serializer.save(author=self.request.user, room=room)
 
-#Message Deletion
-class MessageDelete(generics.DestroyAPIView):
-    serializer_class= MessageSerializer
+
+#Edit Delete Update Messages
+class MessageDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
+    lookup_url_kwarg = "message_id"  # matches <int:message_id> in URL
 
     def get_queryset(self):
-        user = self.request.user
+        # Only allow messages in the room
         room_id = self.kwargs.get("room_id")
-        
-        #if user is not admin delete only his messages
-        qs = Message.objects.filter(author=user, room_id=room_id)
-        room= Room.objects.get(id=room_id)
+        return Message.objects.filter(room_id=room_id).order_by("created_at")
 
-        #if auth-user is admin
-        if room.owner == user or user in room.admins.all():
-            #delete each message he wants
-            qs = Message.objects.filter(room_id=room_id)
-        
-        return qs
+    # Edit/update a message
+    def perform_update(self, serializer):
+        if self.request.user != serializer.instance.author:
+            raise PermissionDenied("You can only edit your own messages.")
+        serializer.save()
 
+    # Delete a message
+    def perform_destroy(self, instance):
+        user = self.request.user
+        room = instance.room
+        # Only author or room owner/admin can delete
+        if instance.author != user and user != room.owner and user not in room.admins.all():
+            raise PermissionDenied("You cannot delete this message.")
+        instance.delete()

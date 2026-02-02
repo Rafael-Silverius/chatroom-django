@@ -11,8 +11,15 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self,validated_data):
         user = User.objects.create_user(**validated_data)
         return user
-    
+
+
+class AuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=User
+        fields= ['id','username']
+
 class MessageSerializer(serializers.ModelSerializer):
+    author = AuthorSerializer(read_only=True)
     class Meta:
         model = Message
         fields = ['id','content','created_at','room','author']
@@ -27,3 +34,7 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = ['id','name','created_at','owner','admins','members']
         
+class AuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=User
+        fields= ['id','username']

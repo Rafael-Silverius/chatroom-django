@@ -13,5 +13,3 @@ urlpatterns = [
     path('api-auth/', include("rest_framework.urls")),
     path('api/',include("api.urls")),
 ]
-
-#eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY5ODUwMzQ3LCJpYXQiOjE3Njk4NDg1NDcsImp0aSI6ImRlNzY2ZGRkMThmZDQzZjg4MTc1NDg2MmUxZjI1ODU2IiwidXNlcl9pZCI6IjEifQ.-TM9g4sdBpL3AoBc4nW5kJwgmx7xHFyYBFYFrYk-4To
