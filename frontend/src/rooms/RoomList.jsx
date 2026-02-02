@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRegisteredRooms } from "../api/rooms/registeredRooms";
+import { getRegisteredRooms } from "../api/rooms";
 
 export default function RoomList({ setActiveRoom }) {
   const [rooms, setRooms] = useState([]);

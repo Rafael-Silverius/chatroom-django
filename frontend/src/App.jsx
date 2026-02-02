@@ -3,6 +3,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+import DiscoverRooms from "./pages/DiscoverRooms";
 
 import ProtectedRoute from "./components/routes/ProtectedRoutes";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
@@ -32,6 +33,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/logout" element={<Logout />} />
+        <Route path="/discover" element={<DiscoverRooms />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

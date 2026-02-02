@@ -1,25 +1,35 @@
 import { useEffect, useState } from "react";
 import MessageInput from "../chat/MessageInput";
 import MessageList from "../chat/MessageList";
-import api from "../../api/api";
+import { getRoomMessages } from "../../api/messages";
 
-export default function ChatPanel({ activeRoom }) {
+export default function ChatPanel({ activeRoom, currentUser }) {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!activeRoom) return;
+    if (!activeRoom) return; // do nothing if no room selected
 
+    let isMounted = true;
     const fetchMessages = async () => {
-      setIsLoading(true);
       try {
-        const res = await api.get(`/api/rooms/${activeRoom.id}/messages`);
-        setMessages(res.data);
+        setIsLoading(true);
+        const messages = await getRoomMessages(activeRoom.id);
+        if (isMounted) {
+          setMessages(messages);
+        }
+      } catch (err) {
+        console.error(err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
+
     fetchMessages();
+
+    return () => {
+      isMounted = false; // cleanup flag
+    };
   }, [activeRoom]);
 
   if (!activeRoom) {
@@ -28,13 +38,25 @@ export default function ChatPanel({ activeRoom }) {
 
   return (
     <div className="chat">
-      <h2>{activeRoom.name}</h2>
-      {isLoading ? (
-        <p className="loading">Loading messages...</p>
+      {activeRoom ? (
+        isLoading ? (
+          <p className="loading">Loading messages...</p>
+        ) : (
+          <MessageList
+            roomID={activeRoom.id}
+            messages={messages}
+            setMessages={setMessages}
+            currentUser={currentUser}
+          />
+        )
       ) : (
-        <MessageList messages={messages} />
+        <div className="">Select a room</div>
       )}
-      <MessageInput roomID={activeRoom.id} setMessages={setMessages} />
+
+      {/* Only show MessageInput if a room is selected */}
+      {activeRoom && (
+        <MessageInput roomID={activeRoom.id} setMessages={setMessages} />
+      )}
     </div>
   );
 }
