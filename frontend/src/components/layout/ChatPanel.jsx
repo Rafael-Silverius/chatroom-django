@@ -32,10 +32,6 @@ export default function ChatPanel({ activeRoom, currentUser }) {
     };
   }, [activeRoom]);
 
-  if (!activeRoom) {
-    return <div className="empty">Select a room</div>;
-  }
-
   return (
     <div className="chat">
       {activeRoom ? (
@@ -50,7 +46,7 @@ export default function ChatPanel({ activeRoom, currentUser }) {
           />
         )
       ) : (
-        <div className="">Select a room</div>
+        <div className="">Click a room to enter</div>
       )}
 
       {/* Only show MessageInput if a room is selected */}

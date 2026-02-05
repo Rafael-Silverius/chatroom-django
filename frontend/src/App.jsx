@@ -7,6 +7,7 @@ import DiscoverRooms from "./pages/DiscoverRooms";
 
 import ProtectedRoute from "./components/routes/ProtectedRoutes";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import RoomProfile from "./pages/RoomProfile";
 
 function Logout() {
   localStorage.clear();
@@ -34,6 +35,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/discover" element={<DiscoverRooms />} />
+        <Route path="/rooms/:roomId" element={<RoomProfile />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

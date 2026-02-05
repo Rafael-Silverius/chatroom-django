@@ -30,18 +30,21 @@ class MeView(APIView):
 
 #Room Creation
 class RoomListCreate(generics.ListCreateAPIView):
-    serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated]
+    serializer_class = RoomSerializer
 
-    #Display my registered rooms
     def get_queryset(self):
-       return Room.objects.filter(members=self.request.user)
-    
+        #Display my registered rooms
+        return Room.objects.filter(members=self.request.user)
+  
+    def get_serializer_context(self):
+        return {"request":self.request}
+
     #Create a new room with the auth-user as the owner
     def perform_create(self,serializer):
        room = serializer.save(owner=self.request.user)
 
-       #make the user which creates the room also an admin and member
+       # Creator becomes admin + member
        room.members.add(self.request.user)
        room.admins.add(self.request.user)
 
@@ -51,11 +54,11 @@ class DiscoverRoomsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        # Rooms I am NOT a member of
         return Room.objects.exclude(members=self.request.user)
 
-
-
-
+    def get_serializer_context(self):
+        return {"request": self.request}
 
 #Join Room
 class JoinRoomView(APIView):
@@ -65,7 +68,7 @@ class JoinRoomView(APIView):
         room = get_object_or_404(Room, id=room_id)
 
         if request.user in room.members.all():
-            return Response({"detail": "You are already a member of this room."})
+            return Response({"detail": "You are already a member of this room."},status=400)
 
         room.members.add(request.user)
         return Response({"detail": f"{request.user.username} joined {room.name}"})
@@ -75,11 +78,46 @@ class LeaveRoomView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, room_id):
+
         room = get_object_or_404(Room, id=room_id)
+
+        if not room.members.filter(id=request.user.id).exists():
+            return Response(
+                {
+                    "success": False,
+                    "detail": "You are not a member"
+                },
+                status=400
+            )
+
         room.members.remove(request.user)
-        return Response({"detail": f"{request.user.username} left {room.name}"})
 
+        return Response(
+            {
+                "success": True,
+                "detail": f"You left {room.name}"
+            },
+            status=200
+        )
 
+#Room Details
+class RoomDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RoomSerializer
+    queryset = Room.objects.all()
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def get_object(self):
+        room = super().get_object()
+
+        # Only members can see room profile
+        if self.request.user not in room.members.all():
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You are not a member of this room")
+
+        return room
 
 
 #Create New Messages

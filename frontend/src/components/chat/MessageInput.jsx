@@ -20,16 +20,32 @@ export default function MessageInput({ roomID, setMessages }) {
     }
   };
 
+  const handleKeyDown = (e) => {
+    // ENTER → Send (without Shift)
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+
+    // ESC → Clear
+    if (e.key === "Escape") {
+      setContent("");
+    }
+  };
+
   return (
     <div>
-      <input
+      <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="Type a message..."
         disabled={isSending}
+        rows={2}
+        autoFocus
       />
       <button onClick={sendMessage} disabled={isSending}>
-        {isSending ? "Posting your message..." : "Post"}
+        {isSending ? "Posting..." : "Post"}
       </button>
     </div>
   );

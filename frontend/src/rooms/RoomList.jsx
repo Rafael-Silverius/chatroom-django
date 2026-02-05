@@ -17,7 +17,7 @@ export default function RoomList({ setActiveRoom }) {
       {rooms.map((room) => (
         <li
           key={room.id}
-          onClick={() => handleSelectRoom(room)} // ✅ OK
+          onClick={() => handleSelectRoom(room)}
           style={{ cursor: "pointer" }}
         >
           {room.name}

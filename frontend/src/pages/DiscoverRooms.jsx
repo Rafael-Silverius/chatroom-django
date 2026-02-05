@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { getDiscoverRooms, joinRoom } from "../api/rooms";
 import Sidebar from "../components/layout/Sidebar";
+import { useNavigate } from "react-router-dom";
 
 function DiscoverRoomsPage() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -24,6 +26,7 @@ function DiscoverRoomsPage() {
     try {
       const res = await joinRoom(roomId);
       console.log(res.detail);
+      navigate("/");
     } catch (error) {
       console.error(error);
       alert(error);
